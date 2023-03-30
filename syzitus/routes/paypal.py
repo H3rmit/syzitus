@@ -12,16 +12,25 @@ CLIENT=PayPalClient()
 
 def coins_to_price_cents(n, code=None):
 
+    per_coin=100
+
     if n>=52:
-        price= 100*n - 1001
+        price= per_coin*(n-7)
+    elif n>=40:
+        price= per_coin*(n-5)
     elif n>=26:
-        price= 100*n-401
+        price= per_coin*(n-3) 
+    elif n>=20:
+        price= per_coin*(n-2)
     elif n>=12:
-        price= 100*n-101
+        price= per_coin*(n-1)
     elif n >=4:
-        price= 100*n-1
+        price= per_coin*n
     else:
-        price= 100*n+49
+        price= per_coin*n+75
+
+    #drop one cent for the $X.99
+    price -= 1
 
     if code:
         if isinstance(code, str):
@@ -86,7 +95,7 @@ def shop_buy_coins():
     g.db.add(new_txn)
     g.db.commit()
 
-    return redirect(new_txn.approve_url)
+    return jsonify({'redirect':new_txn.approve_url}), 302
 
 
 @app.route("/shop/negative_balance", methods=["POST"])
@@ -196,9 +205,12 @@ def paypal_webhook_handler():
         return "", 204
 
 
-    #increase to cover extra round of paypal fees
-    amount_cents += 30
-    amount_cents /= (1-0.029)
+    #increase to cover the costs of two rounds of paypal fees
+    #one from the reversed transaction, and one from the transaction required to clear the negative balance
+    amount_cents += 49
+    amount_cents /= (1-0.0349)
+    amount_cents += 49
+    amount_cents /= (1-0.0349)
     amount_cents = int(amount_cents)
 
     txn.user.negative_balance_cents+=amount_cents
@@ -210,7 +222,8 @@ def paypal_webhook_handler():
 
     g.db.commit()
 
-
+    text=f"PayPal has informed us that the following transaction has been reversed:\n\n{txn.permalink_full}\n\nYour account now has a negative balance, which will need to be [cleared](/settings/premium) in order to use site features."
+    send_notification(txn.user, text)
 
     return "", 204
 

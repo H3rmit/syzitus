@@ -606,8 +606,7 @@ class User(Base, standard_mixin, age_mixin):
     @cache.memoize()
     def true_score(self):   
         
-        value= max((self.karma + self.comment_karma), -5)
-        return value
+        return max((self.karma + self.comment_karma), -5)
 
     @property
     def fullname(self):
@@ -1071,7 +1070,7 @@ class User(Base, standard_mixin, age_mixin):
         if self.has_profile and not self.is_deleted:
             return f"https://{app.config['S3_BUCKET']}/uid/{self.base36id}/profile-{self.profile_nonce}.png"
         else:
-            return f"http{'s' if app.config['FORCE_HTTPS'] else ''}://{app.config['SERVER_NAME']}/assets/images/profiles/default-profile-pic.png"
+            return f"http{'s' if app.config['FORCE_HTTPS'] else ''}://{app.config['SERVER_NAME']}/logo/fontawesome/solid//{app.config['COLOR_PRIMARY']}/150"
 
     @property
     def can_make_guild(self):
@@ -1106,8 +1105,6 @@ class User(Base, standard_mixin, age_mixin):
     @property
     def can_submit_image(self):
         # Has premium
-        # Has 1000 Rep, or 500 for older accounts
-        # if connecting through Tor, must have verified email
         return (self.has_premium or self.true_score >= app.config['UPLOAD_IMAGE_REP']) and not g.is_tor
 
     @property
@@ -1501,7 +1498,7 @@ class User(Base, standard_mixin, age_mixin):
 
     @property
     def can_upload_comment_image(self):
-        return request.headers.get("cf-ipcountry") != "T1" #self.has_premium and (request.headers.get("cf-ipcountry")!="T1" or self.is_activated)
+        return self.has_premium and not g.is_tor
 
     @property
     def can_change_name(self):

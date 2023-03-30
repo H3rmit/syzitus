@@ -57,7 +57,7 @@
             <div class="ml-3 w-100">
               <div class="d-flex align-items-center mt-1 mb-2">
                 <h1 class="h3 mb-0">{{ u.username }}</h1>
-                {% if u.username != u.original_username %}
+                {% if u.username != u.original_username and u.id>1 %}
                 <span>
                   <i class="fad fa-user-tag text-info align-middle ml-2" data-toggle="tooltip" data-placement="bottom" title="Original Username: @{{ u.original_username }}"></i>
                 </span>
@@ -164,7 +164,7 @@
       <div class="mt-n3 py-3">
         <a href="{{ u.permalink }}" class="text-black">
           <h1 class="h5 d-inline-block">{{ u.username }}
-            {% if u.username != u.original_username %}
+            {% if u.username != u.original_username and u.id>1 %}
             <span>
               <i class="fad fa-user-tag text-info align-middle ml-2" data-toggle="tooltip" data-placement="bottom" title="Original Username: @{{ u.original_username }}"></i>
             </span>
@@ -235,52 +235,8 @@
 </div>
 {% endif %}
 
-{% if not g.user.has_premium %}
-<div class="sidebar-section">
-  <div class="title">
-    <i class="fas fa-heart mr-2"></i>Support {{ "SITE_NAME" | app_config }}
-  </div>
-  <div class="body">
-    <p>Merch and more. Support {{ "SITE_NAME" | app_config }} today!</p>
+{% include "support_sidebar_block.html" %}
 
-    <a href="https://github.com/thecodeforge/syzitus" target="blank" class="btn btn-block btn-link text-black text-left text-decoration-none px-1 mt-0">
-      <span class="fa-stack fa-1x ml-n1 mr-2">
-        <i class="fas fa-square fa-stack-2x text-gray-300"></i>
-        <i class="fab fa-github fa-stack-1x text-black text-base fa-inverse"></i>
-      </span>Contribute Code
-    </a>
-
-    <a href="/help/donate" target="blank" class="btn btn-block btn-link text-left text-decoration-none px-1 mt-0" style="color: #F7931A!important">
-      <span class="fa-stack fa-1x ml-n1 mr-2">
-        <i class="fas fa-square fa-stack-2x"></i>
-        <i class="fab fa-bitcoin fa-stack-1x text-base fa-inverse" style="color: #F7931A!important;"></i>
-      </span>Donate Cash or Crypto
-    </a>
-
-    <a href="/settings/premium" target="blank" class="btn btn-block btn-link text-left text-decoration-none px-1 mt-0" style="color: #805ad5!important">
-      <span class="fa-stack fa-1x ml-n1 mr-2">
-        <i class="fas fa-square fa-stack-2x"></i>
-        <i class="fas fa-coins fa-stack-1x text-base fa-inverse"></i>
-      </span>{{ "SITE_NAME" | app_config }} Premium
-    </a>
-
-    <a href="https://github.com/thecodeforge/syzitus/issues" target="blank" class="btn btn-block btn-link text-left text-decoration-none px-1 mt-0" style="color: #DC143C!important">
-      <span class="fa-stack fa-1x ml-n1 mr-2">
-        <i class="fas fa-square fa-stack-2x"></i>
-        <i class="fas fa-bug fa-stack-1x text-base fa-inverse"></i>
-      </span>Report Bugs
-    </a>
-    
-    <div data-toggle="tooltip" data-placement="bottom" title="Based on coins redeemed in the last 7 days">
-      <div class="text-center text-small">{{ g.timestamp | coin_goal }}% of goal</div>
-      <div class="progress br-3">
-        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ g.timestamp | coin_goal }}%;" aria-valuenow="{{ g.timestamp | coin_goal }}" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-    </div>
-  </div>
-
-</div>
-{% endif %}
 {% endblock %}
 
 {% block adminpanel %}

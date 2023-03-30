@@ -28,7 +28,7 @@ from redis import BlockingConnectionPool, ConnectionPool
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
-_version = "4.3.1"
+_version = "4.3.4"
 
 app = Flask(__name__,
             template_folder='./templates'
@@ -81,7 +81,7 @@ app.config["SERVER_NAME"] = SERVER_NAME #DomainMatcher(SERVER_NAME, ONION_NAME)
 
 # Cookie stuff
 app.config["SHORT_DOMAIN"]=environ.get("SHORT_DOMAIN","").lstrip().rstrip()
-app.config["SESSION_COOKIE_NAME"] = f"__Host-{app.config['SITE_NAME']}"
+app.config["SESSION_COOKIE_NAME"] = f"__Host-{app.config['SERVER_NAME']}"
 app.config["VERSION"] = _version
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024
 app.config["SESSION_COOKIE_SECURE"] = bool(int(environ.get("FORCE_HTTPS", 1)))
@@ -464,8 +464,14 @@ try:
         db.commit()
         debug(f"@{app.config['SITE_NAME'].lower()} created")
 
+    elif len(app.config["SERVER_NAME"].split('.'))==2 and system.username != app.config["SITE_NAME"].lower():
+        system.username=app.config["SITE_NAME"].lower()
+        db.add(system)
+        db.commit()
+
 
     general = db.query(syzitus.classes.Board).filter_by(id=1).first()
+    description_text=f"Catch-all zone for content rejected from elsewhere on {app.config['SITE_NAME']}. Not shown in All/Trending."
 
     if not general:
 
@@ -477,12 +483,17 @@ try:
             is_siegable=False,
             all_opt_out=True,
             subcat_id=71,
-            description=f"Catch-all zone for content rejected from elsewhere on {app.config['SITE_NAME']}. Not shown in All/Trending.",
-            description_html=f"<p>Catch-all zone for content rejected from elsewhere on {app.config['SITE_NAME']}. Not shown in All/Trending.</p>"
+            description=description_text,
+            description_html=f"<p>{description_text}</p>"
             )
         db.add(general)
         db.commit()
         debug("+general created")
+    elif len(app.config["SERVER_NAME"].split('.'))==2 and general.description != description_text:
+        general.description=description_text
+        general.description_html=f"<p>{description_text}</p>"
+        db.add(general)
+        db.commit()
 
     img = db.query(syzitus.classes.Domain).filter_by(domain=app.config["S3_BUCKET"]).first()
 

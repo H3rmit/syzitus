@@ -1757,13 +1757,6 @@ def api_distinguish_post(post_id):
 def api_sticky_post(post_id):
 
     post = get_post(post_id)
-
-    if not post.stickied:
-        already_stickied = g.db.query(Submission).filter_by(stickied=True).first()
-        if already_stickied:
-            already_stickied.stickied = False
-            g.db.add(already_stickied)
-
     post.stickied = not post.stickied
     g.db.add(post)
     g.db.commit()
@@ -1988,13 +1981,11 @@ def admin_give_coins():
     g.db.add(target_user)
     g.db.commit()
 
-    user=get_user(request.form.get('target_username',''))
+    send_notification(target_user, f"{coin_count} Coin{' has' if coin_count==1 else 's have'} been added to your account by {app.config['SITE_NAME']} staff.")
 
-    send_notification(user, f"{coin_count} Coin{' has' if coin_count==1 else 's have'} been added to your account by {app.config['SITE_NAME']} staff.")
+    debug(f"Give coins: @{g.user.username} gave {coin_count} Coins to @{target_user.username}")
 
-    debug(f"Give coins: @{g.user.username} gave {coin_count} Coins to @{user.original_username}")
-
-    return jsonify({"message":f"{coin_count} Coins given to @{user.username}"})
+    return jsonify({"message":f"{coin_count} Coins given to @{target_user.username}"})
 
 
 @app.get("/admin/useragent")

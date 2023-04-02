@@ -28,7 +28,7 @@ from redis import BlockingConnectionPool, ConnectionPool
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
-_version = "4.3.4"
+_version = "4.4.1"
 
 app = Flask(__name__,
             template_folder='./templates'
@@ -39,6 +39,8 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=app.config["PROXYFIX_X_FOR"])
 app.url_map.strict_slashes = False
 
 app.config["SITE_NAME"]=environ.get("SITE_NAME", "Syzitus").lstrip().rstrip()
+app.config["TAGLINE"]=environ.get("TAGLINE", "Set a TAGLINE!").lstrip().rstrip()
+app.config["SUBTITLE"]=environ.get("SUBTITLE", "").lstrip().rstrip()
 
 app.config["COLOR_PRIMARY"]=environ.get("COLOR_PRIMARY", "805AD5").lstrip().rstrip()
 app.config["COLOR_SECONDARY"]=environ.get("COLOR_SECONDARY", "E2E8F0").lstrip().rstrip()
@@ -175,6 +177,7 @@ app.config["DISCORD_CHANNEL_IDS"]={
 #premium related configs
 app.config["COINS_REQUIRED_CHANGE_USERNAME"]=int(environ.get("COINS_REQUIRED_CHANGE_USERNAME", 20))
 app.config["COOLDOWN_DAYS_CHANGE_USERNAME"]=int(environ.get("COOLDOWN_DAYS_CHANGE_USERNAME", 7))
+app.config["WEEKLY_COIN_TARGET"]=int(environ.get("WEEKLY_COIN_TARGET", 20))
 
 #precompute logo urls
 app.config["IMG_URL_MASCOT"] = f"/mascot/{app.config['COLOR_PRIMARY'].lower()}"

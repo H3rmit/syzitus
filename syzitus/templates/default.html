@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="{{ 'IMG_URL_FAVICON' | app_config }}">
   
 	{% block title %}
-	<title>{{ "SITE_NAME" | app_config }}: The Open-Source Platform for Independent Internet Communities</title>
+	<title>{{ "SITE_NAME" | app_config }}{{ ': ' + ( 'TAGLINE' | app_config ) if ( 'TAGLINE' | app_config ) else ''}}</title>
 
   <meta property="og:type" content="article" />
   <meta property="og:title" content="{{ 'SITE_NAME' | app_config }}: The Open-Source Platform for Independent Internet Communities" />
@@ -46,17 +46,120 @@
   <meta name="application-name" content="{{ 'SITE_NAME' | app_config }}">
   <meta name="msapplication-TileColor" content="#{{ 'COLOR_PRIMARY' | app_config }}">
   <meta name="theme-color" content="#{{ 'COLOR_PRIMARY' | app_config }}">
+
+{# all this ios pwa splash screen stuff doesn't work
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1136/640"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2436/1125"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1792/828"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/828/1792"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1334/750"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1242/2688"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2208/1242"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1125/2436"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1242/2208"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2732/2048"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2688/1242"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2224/1668"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/750/1334"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2048/2732"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2388/1668"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1668/2224"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/640/1136"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1668/2388"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/2048/1536"
+  />
+  <link
+    rel="apple-touch-startup-image"
+    media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    href="/logo/splash/{{ 'COLOR_PRIMARY' | app_config }}/{{ ( 'SITE_NAME' | app_config )[0] | lower }}/1536/2048"
+  />
+  #}
   {% endblock %}
 
 
   <!-- Ruqqus CSS -->
   
   {% if b and not request.path.startswith("/mod") %}
-    <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="{{ b.main_css_dark_url }}?v=4.3.4">
-    <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="{{ b.main_css_light_url }}?v=4.3.4">
+    <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="{{ b.main_css_dark_url }}?v=4.4.1">
+    <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="{{ b.main_css_light_url }}?v=4.4.1">
   {% else %}
-    <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/dark.css?v=4.3.4">
-    <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/light.css?v=4.3.4">
+    <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/dark.css?v=4.4.1">
+    <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/light.css?v=4.4.1">
   {% endif %}
 
   <!-- Code prettify - after default css but before custom css so it can be overridden -->
@@ -97,7 +200,7 @@
 {% if request.args.get("from_ruqqus") %}
 <div id="redirect-banner" class="bg-warning w-100">
   <div class="mx-auto text-center">
-    <span class="text-black">Welcome to Syzitus, a spiritual successor to the defunct Ruqqus platform. The rules have changed; please familiarize yourself with the updated <a href="/help/terms" target="_blank">terms</a> and <a href="help/rules" target="_blank">content policy</a>. Note that data has not carried over; whatever content you were looking for is not here.</span>
+    <span class="text-black">Welcome to Syzitus, a spiritual successor to the old Ruqqus platform. The rules have changed; please familiarize yourself with the updated <a href="/help/terms" target="_blank">terms</a> and <a href="help/rules" target="_blank">content policy</a>. Note that data has not carried over; whatever content you were looking for is not here.</span>
   </div>
 </div>
 {% elif ('EVENT_SNOWBALL_FIGHT'|app_config) and g.user %}
@@ -281,7 +384,7 @@
 </script>
 {% endblock %}
 
-<script src="/assets/js/all_js.js?v=4.3.4" importance="high" ></script>
+<script src="/assets/js/all_js.js?v=4.4.1" importance="high" ></script>
 
 
 <!-- Mobile "install the app" tooltip -->

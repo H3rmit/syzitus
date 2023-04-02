@@ -9,9 +9,10 @@
   <meta name="author" content="">
 
   {% block title %}
-  <title>Donate - {{ 'SITE_NAME' | app_config | lower }}</title>
+  <title>Donate - {{ 'SITE_NAME' | app_config }}</title>
+  <meta name="description" content="{{ 'TAGLINE' | app_config }}">
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="{{ 'SITE_NAME' | app_config }}: Awesome Online Communities, Without Censorship" />
+  <meta property="og:title" content="Donate - {{ 'SITE_NAME' | app_config }}" />
   <meta property="og:site_name" content="{{ 'SERVER_NAME' | app_config }}" />
   <meta property="og:image" content="{{ 'IMG_URL_THUMBSPLASH' | app_config }}" />
   <meta property="og:url" content="{{ request.path | full_link }}">
@@ -19,7 +20,7 @@
   <meta property="og:site_name" content="{{ 'SERVER_NAME' | app_config }}" />
 
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="{{ 'SITE_NAME' | app_config }}: Awesome Online Communities, Without Censorship" />
+  <meta name="twitter:title" content="{{ 'SITE_NAME' | app_config }}{{ ': ' + ( 'TAGLINE' | app_config ) if ( 'TAGLINE' | app_config ) else ''}}" />
   <meta name="twitter:description" content="Support {{ 'SITE_NAME' | app_config }}. {{ 'SITE_NAME' | app_config }} is an open-source web app that lets you enjoy online communities focused around topics you love, without censorship and moderator abuse." />
   <meta name="twitter:image" content="{{ 'IMG_URL_THUMBSPLASH' | app_config }}" />
   <meta name="twitter:url" content="{{ request.path | full_link }}" />
@@ -27,12 +28,12 @@
   
   
   <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.4/css/bootstrap.min.css"
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
   integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
   <!-- {{ 'SITE_NAME' | app_config }} CSS -->
-  <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/dark.css?v=4.3.4">
-  <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/light.css?v=4.3.4">
+  <link id="css-link-dark" rel="{% if session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/dark.css?v=4.4.1">
+  <link id="css-link-light" rel="{% if not session.get('dark_mode_enabled') %}stylesheet{% endif %}" href="/assets/style/{{ 'COLOR_PRIMARY' | app_config }}/light.css?v=4.4.1">
 
   <!-- Font Awesome -->
   <link href="/assets/fontawesome/css/all.css" rel="stylesheet"> <!--load all styles -->

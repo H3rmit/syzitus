@@ -12,6 +12,7 @@ import threading
 from syzitus.helpers.base36 import base36encode
 from syzitus.helpers.security import generate_hash, validate_hash
 from syzitus.helpers.lazy import lazy
+from syzitus.helpers.user_imports import send_notif
 import syzitus.helpers.aws as aws
 from syzitus.helpers.discord import add_role, delete_role, discord_log_event
 from .alts import Alt
@@ -29,39 +30,6 @@ from .paypal import PayPalTxn
 from .flags import Report
 
 from syzitus.__main__ import Base, cache, app, g, db_session, debug
-
-
-#this is repeated here to avoid import circle
-def send_notif(user, text):
-    text_html = markdown(text)
-
-    #text_html = sanitize(text_html, linkgen=True)#, noimages=True)
-
-    new_comment = Comment(author_id=1,
-                          # body=text,
-                          # body_html=text_html,
-                          parent_submission=None,
-                          distinguish_level=6,
-                          is_offensive=False
-                          )
-    g.db.add(new_comment)
-
-    g.db.flush()
-
-    new_aux = CommentAux(id=new_comment.id,
-                         body=text,
-                         body_html=text_html
-                         )
-    g.db.add(new_aux)
-    g.db.commit()
-    # g.db.begin()
-
-    notif = Notification(comment_id=new_comment.id,
-                         user_id=user.id)
-    g.db.add(notif)
-    g.db.commit()
-
-
 
 class User(Base, standard_mixin, age_mixin):
 
@@ -99,6 +67,7 @@ class User(Base, standard_mixin, age_mixin):
     show_nsfl = Column(Boolean, default=False)
     custom_filter_list=Column(String(1000), default="")
     filter_nsfw = Column(Boolean, default=False)
+    per_page_preference=Column(Integer, default=25)
 
     #security
     login_nonce = Column(Integer, default=0)
@@ -295,7 +264,7 @@ class User(Base, standard_mixin, age_mixin):
     
 
     @cache.memoize()
-    def idlist(self, sort=None, page=1, t=None, filter_words="", **kwargs):
+    def idlist(self, sort=None, page=1, t=None, filter_words="", per_page=25, **kwargs):
 
         posts = g.db.query(Submission).options(load_only(Submission.id), lazyload('*')).filter_by(
             is_banned=False,
@@ -411,10 +380,10 @@ class User(Base, standard_mixin, age_mixin):
         else:
             abort(422)
 
-        return [x.id for x in posts.offset(25 * (page - 1)).limit(26).all()]
+        return [x.id for x in posts.offset(per_page * (page - 1)).limit(per_page+1).all()]
 
     @cache.memoize()
-    def userpagelisting(self, page=1, sort="new", t="all"):
+    def userpagelisting(self, page=1, sort="new", t="all", per_page=25):
 
         submissions = g.db.query(Submission).options(
             load_only(Submission.id)).filter_by(author_id=self.id)
@@ -475,11 +444,11 @@ class User(Base, standard_mixin, age_mixin):
             cutoff = 0
         submissions = submissions.filter(Submission.created_utc >= cutoff)
 
-        listing = [x.id for x in submissions.offset(25 * (page - 1)).limit(26)]
+        listing = [x.id for x in submissions.offset(per_page * (page - 1)).limit(per_page+1)]
         return listing
 
     @cache.memoize()
-    def commentlisting(self, page=1, sort="new", t="all"):
+    def commentlisting(self, page=1, sort="new", t="all", per_page=25):
         comments = self.comments.options(
             load_only(Comment.id)).filter(Comment.parent_submission is not None).join(Comment.post)
 
@@ -560,7 +529,7 @@ class User(Base, standard_mixin, age_mixin):
             cutoff = 0
         comments = comments.filter(Comment.created_utc >= cutoff)
 
-        comments = comments.offset(25 * (page - 1)).limit(26)
+        comments = comments.offset(per_page * (page - 1)).limit(per_page+1)
 
         listing = [c.id for c in comments]
         return listing
@@ -709,10 +678,8 @@ class User(Base, standard_mixin, age_mixin):
 
 
         notifications = g.db.query(Notification
-            # ).options(
-            # lazyload('*'),
-            # joinedload(Notification.comment).lazyload('*'),
-            # joinedload(Notification.comment).joinedload(Comment.comment_aux)
+            ).options(
+            lazyload('*'),
             ).join(
             Notification.comment
             ).filter(
@@ -759,21 +726,27 @@ class User(Base, standard_mixin, age_mixin):
         )
 
         notifications = notifications.order_by(
+            #staying at 25 for performance reasons
             Notification.id.desc()).offset(25 * (page - 1)).limit(26).all()
 
-        output = []
+        mark_as_read=False
         for x in notifications[0:25]:
+
+            if x.read:
+                continue
+
             x.read = True
             g.db.add(x)
-            output.append(x.comment_id)
+            mark_as_read=True
 
-        g.db.commit()
+        if mark_as_read:
+            g.db.commit()
 
-        return output
+        return [x.comment_id for x in notifications]
 
     def notification_postlisting(self, all_=False, page=1):
 
-        notifications=g.db.query(Notification).join(
+        notifications=g.db.query(Notification).options(lazyload('*')).join(
             Notification.post
             ).filter(
             Notification.user_id==self.id,
@@ -790,14 +763,21 @@ class User(Base, standard_mixin, age_mixin):
                 Notification.id.desc()
             ).offset(25*(page-1)).limit(26)
 
-        output=[]
+        mark_as_read=False
         for x in notifications[0:25]:
+
+            if x.read:
+                continue
+
             x.read=True
             g.db.add(x)
-            output.append(x.submission_id)
+            mark_as_ready=True
+
+        if mark_as_read:
+            g.db.commit()
 
         g.db.commit()
-        return output
+        return [x.submission_id for x in notifications]
 
     @property
     @lazy
@@ -1334,7 +1314,7 @@ class User(Base, standard_mixin, age_mixin):
             OauthApp.id.asc()).all()]
 
 
-    # def saved_idlist(self, page=1):
+    # def saved_idlist(self, page=1, per_page=25):
 
     #     posts = g.db.query(Submission.id).options(lazyload('*')).filter_by(is_banned=False,
     #                                                                        deleted_utc=0
@@ -1382,7 +1362,7 @@ class User(Base, standard_mixin, age_mixin):
 
     #     posts=posts.order_by(Submission.created_utc.desc())
         
-    #     return [x[0] for x in posts.offset(25 * (page - 1)).limit(26).all()]
+    #     return [x[0] for x in posts.offset(per_page * (page - 1)).limit(per_page+1).all()]
 
 
 
@@ -1425,6 +1405,9 @@ class User(Base, standard_mixin, age_mixin):
         now=g.timestamp
 
         if self.negative_balance_cents:
+            return False
+
+        if self.is_permbanned:
             return False
 
         elif self.premium_expires_utc > now:

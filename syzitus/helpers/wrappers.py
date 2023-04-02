@@ -578,3 +578,23 @@ def cf_cache(f):
     wrapper.__name__=f.__name__
     wrapper.__doc__ = f.__doc__
     return wrapper
+
+def per_page(f):
+
+    #wrapper that adjusts the per-page qty depending on premium status and user settings
+
+    def wrapper(*args, **kwargs):
+
+        if g.user and g.user.has_premium:
+            arg=int(request.values.get('per_page', g.user.per_page_preference))
+            g.per_page=min(max(25, arg), 200)
+        else:
+            g.per_page=25
+
+        resp=f(*args, **kwargs)
+
+        return resp
+
+    wrapper.__name__=f.__name__
+    wrapper.__doc__ = f.__doc__
+    return wrapper

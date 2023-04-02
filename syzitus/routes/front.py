@@ -37,7 +37,7 @@ def notifications():
         system_only=request.path=="/notifications/system"
         )
     
-    next_exists = (len(cids) == 26)
+    next_exists = (len(cids) == 25)
     cids = cids[0:25]
 
     comments = get_comments(cids, sort_type="new", load_parent=True)
@@ -88,8 +88,8 @@ def notifications_posts():
         all_=request.args.get("all")
         )
 
-    next_exists=(len(pids)==26)
-    pids=pids[0:25]
+    next_exists=(len(pids)==g.per_page+1)
+    pids=pids[0:g.per_page]
 
     posts=get_posts(pids, sort="new")
 
@@ -276,6 +276,7 @@ def frontlist(sort=None, page=1, nsfw=False, nsfl=False,
 @app.route("/", methods=["GET"])
 @app.route("/api/v2/me/submissions")
 @auth_desired
+@per_page
 @api("read")
 def home():
     """
@@ -310,6 +311,7 @@ Optional query parameters:
             only=only,
             t=t,
             filter_words=g.user.filter_words,
+            per_page=g.per_page,
 
             # these arguments don't really do much but they exist for
             # cache memoization differentiation
@@ -323,8 +325,8 @@ Optional query parameters:
 
             )
 
-        next_exists=(len(ids)==26)
-        ids=ids[0:25]
+        next_exists=(len(ids)==g.per_page+1)
+        ids=ids[0:g.per_page]
 
         # If page 1, check for sticky
         if page == 1 and not ignore_pinned:
@@ -376,6 +378,7 @@ def categories_select():
 @app.route("/inpage/all")
 @app.get("/api/v2/submissions")
 @auth_desired
+@per_page
 @api("read")
 def front_all():
     """
@@ -435,6 +438,7 @@ Optional query parameters:
 
     ids = frontlist(
         sort=sort,
+        per_page=g.per_page,
         page=page,
         nsfw=(g.user and g.user.over_18 and not g.user.filter_nsfw),
         nsfl=(g.user and g.user.show_nsfl),
@@ -448,8 +452,8 @@ Optional query parameters:
         )
 
     # check existence of next page
-    next_exists = (len(ids) == 26)
-    ids = ids[0:25]
+    next_exists = (len(ids) == g.per_page+1)
+    ids = ids[0:g.per_page]
 
    # If page 1, check for sticky
     if page == 1 and not ignore_pinned:
@@ -480,6 +484,7 @@ Optional query parameters:
 
 @app.route("/subcat/<name>", methods=["GET"])
 @auth_desired
+@per_page
 @api("read")
 def subcat(name):
 
@@ -528,11 +533,11 @@ def subcat(name):
                         )
 
     # check existence of next page
-    next_exists = (len(ids) == 26)
-    ids = ids[0:25]
+    next_exists = (len(ids) == g.per_page+1)
+    ids = ids[0:g.per_page]
 
     # check if ids exist
-    posts = get_posts(ids, sort=sort_method)
+    posts = get_posts(ids)
 
     return {'html': lambda: render_template("home.html",
                                             listing=posts,
@@ -573,7 +578,7 @@ def guild_ids(sort="subs", page=1, nsfw=False, cats=[]):
     else:
         abort(400)
 
-    guilds = [x.id for x in guilds.offset(25 * (page - 1)).limit(26).all()]
+    guilds = [x.id for x in guilds.offset(g.per_page * (page - 1)).limit(g.per_page+1).all()]
 
     return guilds
 
@@ -581,6 +586,7 @@ def guild_ids(sort="subs", page=1, nsfw=False, cats=[]):
 @app.route("/browse", methods=["GET"])
 @app.get("/api/v2/guilds")
 @auth_desired
+@per_page
 @api("read")
 def browse_guilds():
     """
@@ -608,8 +614,8 @@ Optional query parameters:
         )
 
     # check existence of next page
-    next_exists = (len(ids) == 26)
-    ids = ids[0:25]
+    next_exists = (len(ids) == g.per_page+1)
+    ids = ids[0:g.per_page]
 
     # check if ids exist
     if ids:
@@ -631,6 +637,7 @@ Optional query parameters:
 @app.route('/mine/guilds', methods=["GET"])
 @app.get("/api/v2/me/guilds")
 @auth_required
+@per_page
 @api("read")
 def my_guilds():
 
@@ -659,9 +666,9 @@ Optional query parameters:
         )
     content = content.order_by(Board.name.asc())
 
-    content = [x for x in content.offset(25 * (page - 1)).limit(26)]
-    next_exists = (len(content) == 26)
-    content = content[0:25]
+    content = [x for x in content.offset(g.per_page * (page - 1)).limit(g.per_page+1)]
+    next_exists = (len(content) == g.per_page+1)
+    content = content[0:g.per_page]
     
     for board in content:
         board._is_subscribed=True
@@ -683,6 +690,7 @@ def mine_redirect():
 @app.get("/mine/users")
 @app.get("/api/v2/me/users")
 @auth_required
+@per_page
 @api("read")
 def my_subs():
 
@@ -705,9 +713,9 @@ Optional query parameters:
 
     content = content.order_by(User.stored_subscriber_count.desc())
 
-    content = [x for x in content.offset(25 * (page - 1)).limit(26)]
-    next_exists = (len(content) == 26)
-    content = content[0:25]
+    content = [x for x in content.offset(g.per_page * (page - 1)).limit(g.per_page+1)]
+    next_exists = (len(content) == g.per_page+1)
+    content = content[0:g.per_page]
 
     return {"html": lambda: render_template("mine/users.html",
                            users=content,
@@ -886,7 +894,7 @@ def comment_idlist(page=1, nsfw=False, **kwargs):
     comments = comments.join(posts, Comment.parent_submission == posts.c.id)
 
     comments = comments.order_by(Comment.created_utc.desc()).offset(
-        25 * (page - 1)).limit(26).all()
+        g.per_page * (page - 1)).limit(g.per_page+1).all()
 
     return [x.id for x in comments]
 
@@ -894,6 +902,7 @@ def comment_idlist(page=1, nsfw=False, **kwargs):
 @app.route("/all/comments", methods=["GET"])
 @app.get("/api/v2/comments")
 @auth_desired
+@per_page
 @api("read")
 def all_comments():
     """
@@ -913,9 +922,9 @@ Optional query parameters:
 
     comments = get_comments(idlist)
 
-    next_exists = len(idlist) == 26
+    next_exists = len(idlist) == g.per_page+1
 
-    idlist = idlist[0:25]
+    idlist = idlist[0:g.per_page]
 
     return {"html": lambda: render_template("home_comments.html",
                                             page=page,

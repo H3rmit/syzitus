@@ -57,6 +57,7 @@ def redditor_moment_redirect(username):
 @app.get("/api/v2/users/<username>/submissions")
 @auth_desired
 @no_archive
+@per_page
 @api("read")
 def u_username(username):
     """
@@ -118,11 +119,11 @@ Optional query parameters:
     page = int(request.args.get("page", "1"))
     page = max(page, 1)
 
-    ids = u.userpagelisting(page=page, sort=sort, t=t)
+    ids = u.userpagelisting(page=page, sort=sort, t=t, per_page=g.per_page)
 
-    # we got 26 items just to see if a next page exists
-    next_exists = (len(ids) == 26)
-    ids = ids[0:25]
+    # we got g.per_page+1 items just to see if a next page exists
+    next_exists = (len(ids) == g.per_page+1)
+    ids = ids[0:g.per_page]
 
     listing = get_posts(ids)
 
@@ -140,6 +141,7 @@ Optional query parameters:
 @app.get("/api/v2/users/<username>/comments")
 @auth_desired
 @no_archive
+@per_page
 @api("read")
 def u_username_comments(username, v=None):
     """
@@ -208,12 +210,13 @@ Optional query parameters:
     ids = user.commentlisting(
         page=page,
         sort=request.args.get("sort","new"),
-        t=request.args.get("t","all")
+        t=request.args.get("t","all"),
+        per_page=g.per_page
         )
 
-    # we got 26 items just to see if a next page exists
-    next_exists = (len(ids) == 26)
-    ids = ids[0:25]
+    # we got g.per_page+1 items just to see if a next page exists
+    next_exists = (len(ids) == g.per_page+1)
+    ids = ids[0:g.per_page]
 
     listing = get_comments(ids)
 
@@ -351,9 +354,9 @@ def user_profile_uid(uid, profile_nonce):
 
 #     ids=g.user.saved_idlist(page=page)
 
-#     next_exists=len(ids)==26
+#     next_exists=len(ids)==g.per_page+1
 
-#     ids=ids[0:25]
+#     ids=ids[0:g.per_page]
 
 #     print(ids)
 
